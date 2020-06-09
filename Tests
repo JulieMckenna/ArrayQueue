@@ -1,0 +1,139 @@
+//package edu.wit.cs.comp2000.tests;
+
+import static org.junit.Assert.assertTrue;
+import java.security.Permission;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.Timeout;
+
+import edu.wit.cs.comp2000.QueueInterface;
+import edu.wit.cs.comp2000.ArrayQueue;
+
+public class LAB4Tests{
+	
+	@Rule
+	public Timeout globalTimeout = Timeout.seconds(5);
+	
+	@SuppressWarnings("serial")
+	private static class ExitException extends SecurityException {}
+	
+	private static class NoExitSecurityManager extends SecurityManager 
+    {
+        @Override
+        public void checkPermission(Permission perm) {}
+        
+        @Override
+        public void checkPermission(Permission perm, Object context) {}
+        
+        @Override
+        public void checkExit(int status) { super.checkExit(status); throw new ExitException(); }
+    }
+	
+	@Before
+    public void setUp() throws Exception 
+    {
+        System.setSecurityManager(new NoExitSecurityManager());
+    }
+	
+	@After
+    public void tearDown() throws Exception 
+    {
+        System.setSecurityManager(null);
+    }
+
+	/*
+	 * enqueue does not return a value, so we check to make sure 
+	 * our implementation doesn't crash and check exceptions
+	 */
+	@Test
+	public void testEnqueue() {
+		QueueInterface<String> testQueue = null;
+		
+		
+		testQueue = new ArrayQueue<>(3); 
+		
+		// check that each enqueue call is successful
+		for (int i = 0; i < 3; i++)
+			testQueue.enqueue("item " + i);
+		
+		// check that enqueue works with resizing
+		testQueue.enqueue("resizing time");
+			
+		
+		/* exception testing pattern:
+	 
+		boolean exceptionDetected = false;
+		
+		try {
+			queue.operation("hi");
+		} catch (ExceptionType e) {
+			exceptionDetected = true;
+		}
+		
+		assertTrue("Performing operation in current state should throw ExceptionType", exceptionDetected);
+		*/
+	}
+
+	
+	@Test
+	public void testIsEmpty() {
+		QueueInterface<String> testQueue = new ArrayQueue<>(); 
+
+		assertTrue("Stack should start out empty", testQueue.isEmpty());
+		
+		testQueue.enqueue("testing");
+		assertTrue("Stack should not be empty with 1 entry", !testQueue.isEmpty());
+		
+		testQueue.enqueue("more testing");
+		assertTrue("Stack should not be empty with 2 entries", !testQueue.isEmpty());
+	
+	}
+	
+	
+	@Test
+	public void testDequeue() {
+		QueueInterface<String> testQueue = new ArrayQueue<>(); 
+
+		assertTrue("Stack should start out empty", testQueue.isEmpty());
+		
+		testQueue.enqueue("test");
+		assertTrue("Stack should not be empty with 1 entry", !testQueue.isEmpty());
+		
+		testQueue.dequeue();
+		assertTrue("Stack should be empty", testQueue.isEmpty());
+	}
+	
+	
+	@Test
+	public void testGetFirst() {
+		QueueInterface<Double> testQueue = new ArrayQueue<>(); 
+
+		assertTrue("Stack should start out empty", testQueue.isEmpty());
+		
+		testQueue.enqueue(2.0);
+		assertTrue("Stack should not be empty with 1 entry", !testQueue.isEmpty());
+		
+		assertTrue("Front should equal 2.0", 2.0 == testQueue.getFront());	
+	}
+	
+	
+	@Test
+	public void testClear() {
+		QueueInterface<String> testQueue = new ArrayQueue<>(); 
+
+		assertTrue("Stack should start out empty", testQueue.isEmpty());
+		
+		testQueue.enqueue("testing");
+		assertTrue("Stack should not be empty with 1 entry", !testQueue.isEmpty());
+		
+		testQueue.enqueue("more testing");
+		assertTrue("Stack should not be empty with 2 entries", !testQueue.isEmpty());
+	
+		testQueue.clear();
+		assertTrue("The stack should be empty", testQueue.isEmpty());
+	}
+	
+}
